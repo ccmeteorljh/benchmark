@@ -1,9 +1,6 @@
 # benchmark
 dltp benchmark
----
-Benchmark
 ===
-paddle
 快速开始
 ---
 以下是该库的简要目录结构及说明：
