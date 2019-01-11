@@ -29,7 +29,7 @@ benchmark
 #### 参数列表如下：
 * --filename         
 `default='system/paddle_cases/local/language_model'   即，运行local模式下的模型`
-* ----frame_id   
+* --frame_id   
 `default='0'  即，默认为paddlepaddle 深度学习框架；` 0：paddlepaddle，1：tensorflow，2：pytorch，3：theano，4：caffe
 * --image_id      
 `default='latest'  默认运行所选框架的最新版本，从数据库中读取；`
