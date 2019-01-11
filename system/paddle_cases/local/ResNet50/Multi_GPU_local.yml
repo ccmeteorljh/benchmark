@@ -1,0 +1,25 @@
+- test:
+    describe: this is local mode for resnet50 of paddle models
+    ploy:
+        submit_period: 7
+        check_period: 1
+        statistics_unit: time
+    cluster_type_id: 0
+    model: ResNet50
+    job_type: 0
+    run_rpc_type: GRPC_SYNC
+    run_machine_tpye: MULTI_GPU
+    batch_size: 256
+    report_index: 0,1,2
+    image_id: latest
+    repo_address: "https://github.com/PaddlePaddle/models"
+    run_cmd: "python train.py --model=ResNet50 --batch_size=256
+              --total_images=1281167 --class_dim=1000 --image_shape=3,224,224
+              --model_save_dir='/ssd1/out_put' --with_mem_opt=False
+              --lr_strategy=piecewise_decay --lr=0.1 --num_epochs=40"
+    body:
+        jobName: "pdm_resnet50_env6_rpc0_local"
+        clusterConf:
+            k8sCpuCores: "4"
+            k8sGpuCards: "8"
+            workdir: '/home/crim/models/fluid/PaddleCV/image_classification'
