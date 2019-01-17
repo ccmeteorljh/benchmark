@@ -1,19 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#======================================================================
-#
-# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
-#
-#======================================================================
-
-"""
-@Desc: log_extract_re module
-@File: log_extract_re.py
-@Author: liangjinhua
-@Date: 2018/10/24 14:16
-"""
-#personal/models 模型提取规则
-
 #github paddle/models 模型提取规则
 re_conf_paddle_models = {
     'CRNN_CTC': {
