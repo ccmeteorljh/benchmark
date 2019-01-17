@@ -18,7 +18,12 @@
 #    echo $id
 #    #docker rm -f $1
 #fi
-
+if [[ $2 =~ "paddle" ]]
+then
+    cmd="export LD_LIBRARY_PATH=/home/work/cudnn/cudnn_v7/cuda/lib64/:/home/work/qa_test/lib/:/usr/lib64/mlnx_ofed/valgrind:/usr/lib/x86_64-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64;sh container_run.sh_holder $3 $4"
+else
+    cmd="sh container_run.sh_holder $3 $4"
+fi
 nvidia-docker run --name $1 \
 -v /home/work:/home/work \
 -v /ssd1:/ssd1 \
@@ -32,7 +37,7 @@ nvidia-docker run --name $1 \
 --privileged \
 -d $2 \
 /bin/bash \
--c "export LD_LIBRARY_PATH=/home/work/cudnn/cudnn_v7/cuda/lib64/:/home/work/qa_test/lib/:/usr/lib64/mlnx_ofed/valgrind:/usr/lib/x86_64-linux-gnu:/usr/local/nvidia/lib:/usr/local/nvidia/lib64; sh container_run.sh_holder $3 $4" > /tmp/$1 &
+-c  "$cmd" > /tmp/$1 &
 #等待容器启动时间10s,获得容器id
 sleep 10
 id=`cat /tmp/$1`
