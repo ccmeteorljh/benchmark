@@ -1,0 +1,26 @@
+- test:
+    describe: this is local mode for resnet50 of tensorflow cases
+    ploy:
+        submit_period: 7
+        check_period: 1
+        statistics_unit: time
+    cluster_type_id: 0
+    model: ResNet50
+    job_type: 0
+    run_rpc_type: GRPC_SYNC
+    run_machine_tpye: MULTI_GPU
+    batch_size: 256
+    report_index: 0,1,2
+    image_id: latest
+    frame_id: 1
+    repo_address: "https://github.com/tensorflow/models.git"
+    run_cmd: "PYTHONPATH=/home/crim/models TF_CPP_MIN_LOG_LEVEL=3
+            python imagenet_main.py
+           --data_dir=/home/crim/models/tf_records/train
+           --resnet_size=50 --num_gpus=8 --batch_size=256"
+    body:
+        jobName: "tf_resnet50_env6_rpc0_local"
+        clusterConf:
+            k8sCpuCores: "4"
+            k8sGpuCards: "8"
+            workdir: '/home/crim/models/official/resnet'
