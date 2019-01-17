@@ -53,8 +53,6 @@ def load_jobs_by_path(path, args):
                 #默认执行框架为paddlepaddle
                 if 'frame_id' not in job["test"]:
                     job["test"]["frame_id"] = args.frame_id
-                else:
-                    job["test"]["frame_id"] = int(args.frame_id)
 
                 #默认运行在paddlecloud上
                 if 'cluster_type_id' not in job["test"]:
@@ -124,6 +122,8 @@ def update_job_status():
         if int(job_info.cluster_type_id) == 0 and job_info.status == "running":
             #update local job's status
             job_status = docker_utils.check_container_status(str(job_info.cluster_job_id))
+        elif int(job_info.cluster_type_id) == 0 and job_info.status == "submit":
+            pass
         elif int(job_info.cluster_type_id) == 1:
             # update paddlecloud job's status
             job_status = api.get_job_status(job_info.cluster_job_id)
