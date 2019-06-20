@@ -280,7 +280,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     DATABASE = {
-        'host': '10.62.51.15',
+        'host': 'xx.xx.xx.xx',
         'port': 8806,
         'user': 'root',
         'passwd': '',
