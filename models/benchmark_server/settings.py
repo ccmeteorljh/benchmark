@@ -38,7 +38,32 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'benchmark_server',
+    'rest_framework',
+    'benchmark_app',
+    'rest_framework_swagger',
+    'django_filters',
 ]
+
+SWAGGER_SETTINGS = {
+    # base schema
+    'SECURITY_DEFINITIONS': {
+        "basic":{
+            'type': 'basic'
+        }
+    },
+    # 'LOGIN_URL': 'rest_framework:login',
+    # 'LOGOUT_URL': 'rest_framework:logout',
+    # 'DOC_EXPANSION': None,
+    # 'SHOW_REQUEST_HEADERS':True,
+    # 'USE_SESSION_AUTH': True,
+    # 'DOC_EXPANSION': 'list',
+    'APIS_SORTER': 'alpha',
+    'JSON_EDITOR': True,
+    'OPERATIONS_SORTER': 'alpha',
+    'VALIDATOR_URL': None,
+}
+
+ALLOWED_HOSTS=["*",]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -73,15 +98,15 @@ WSGI_APPLICATION = 'benchmark_server.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-#需要修改到对应的数据库地址
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': '',
-        'USER': '',
+        'NAME': 'paddle_benchmark',
+        'USER': 'root',
         'PASSWORD': '',
-        'HOST': 'xx.xx.xx.xx',
-        'PORT': ''
+        'HOST': 'xx.yy.zz.dd',
+        'PORT': '8806'
     }
 }
 # DATABASES["default"]["OPTIONS"] = {'init_command':
