@@ -7,8 +7,15 @@
 #======================================================================
 
 """
-@Desc: __init__.py module
-@File: __init__.py.py
+@Desc: app module
+@File: apps.py
 @Author: liangjinhua
-@Date: 2017/12/20 10:36
+@Date: 2019/1/30 19:45
 """
+from __future__ import unicode_literals
+
+from django.apps import AppConfig
+
+
+class BenchmarkAppConfig(AppConfig):
+    name = 'benchmark_app'

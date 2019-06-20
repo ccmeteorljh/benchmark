@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: post_log module
+@File: post_log.py
+@Author: liangjinhua
+@Date: 2018/7/19 15:22
+"""
 import requests
 import os
 
@@ -7,8 +21,7 @@ model = os.getenv("model")
 image_version = os.getenv("image_version")
 frame = os.getenv("frame")
 log_name = os.getenv("log_name")
-host_endpoints = ""
-url = "http://{3}/{0}/{1}/{2}".format(frame, image_version, model, host_endpoints)
+url = "http://10.62.51.15:8301/{0}/{1}/{2}".format(frame, image_version, model)
 print(url)
 data = None
 s = requests.Session()

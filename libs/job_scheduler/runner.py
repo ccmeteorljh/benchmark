@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: runner module
+@File: runner.py
+@Author: liangjinhua
+@Date: 2018/12/12 21:24
+"""
 import logging
 import os
 import sys
@@ -39,3 +53,8 @@ class JobRunner(object):
         csjp.join()
         # cvpp.join()
         #cljr.join()
+
+
+
+
+

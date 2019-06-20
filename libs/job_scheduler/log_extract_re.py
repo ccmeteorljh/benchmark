@@ -1,3 +1,21 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: log_extract_re module
+@File: log_extract_re.py
+@Author: liangjinhua
+@Date: 2018/10/24 14:16
+"""
+import re
+
+#personal/models 模型提取规则
+
 #github paddle/models 模型提取规则
 re_conf_paddle_models = {
     'CRNN_CTC': {
@@ -33,16 +51,16 @@ re_conf_paddle_models = {
     'transformer': {
         'performance': [
             {
-                'keyword': 'val ppl',
-                'result': 'split(", ")[3].split(": ")[1]',
-                'step': 'split(", ")[0].split(": ")[1]',
-                'indicant': 'test_ppl'
+                'keyword': 'BLEU = ',
+                'result': 'split()[2][:-1]',
+                'step': 'index',
+                'indicant': 'BLEU'
             }],
         'speedup_ratio':
             {
-                'keyword': 'consumed ',
-                'result': 'split("consumed ")[1][:-1]',
-                'method': 'mean'
+                'keyword': 'step/s',
+                'result': 'split()[-2]',
+                'method': 'sum'
             }
     },
     'SE-ResNeXt50': {
@@ -136,15 +154,15 @@ re_conf_paddle_models = {
     'ssd': {
         'performance': [
             {
-                'keyword': 'test map [',
-                'result': 'split(",")[1].split("[")[1].split("]")[0]',
-                'step': 'split(",")[0].split(" ")[1]',
+                'keyword': 'Best test map',
+                'result': 'split()[-1]',
+                'step': 'index',
                 'indicant': 'test_map'
             }
         ],
         'speedup_ratio':
             {
-                'keyword': 'time ',
+                'keyword': ' time ',
                 'result': 'split("time ")[1]',
                 'method': 'mean'
             }
@@ -322,10 +340,10 @@ re_conf_paddle_models = {
     'BiDAF': {
         'performance': [
             {
-                'keyword': 'Average loss from batch',
-                'result': 'split("Average loss from batch")[1].split("is ")[1]',
+                'keyword': 'Rouge-L',
+                'result': 'split("Rouge-L")[1].split(": ")[1].split(",")[0]',
                 'step': 'index',
-                'indicant': 'ave_loss'
+                'indicant': 'Rouge-L'
             }
         ],
         'speedup_ratio':
@@ -338,7 +356,7 @@ re_conf_paddle_models = {
     'Faster-RCNN': {
         'performance': [
             {
-                'keyword': 'area=medium',
+                'keyword': re.compile(r"Average Precision.*area=medium.*"),
                 'result': 'split("=")[4][1:]',
                 'step': 'index',
                 'indicant': 'map'
@@ -346,8 +364,8 @@ re_conf_paddle_models = {
         ],
         'speedup_ratio':
             {
-                'keyword': ' time ',
-                'result': 'split(", ")[3].split(" ")[1]',
+                'keyword': ' time: ',
+                'result': 'split()[-1]',
                 'method': 'mean'
             }
     },
@@ -380,13 +398,13 @@ re_conf_tf_models = {
             'performance': [
                 {
                     'keyword': "'accuracy'",
-                    'result': 'split()[7][:-1]',
+                    'result': 'split()[11][:-1]',
                     'step': 'index',
                     'indicant': 'test_acc1'
                 },
                 {
                     'keyword': "'accuracy_top_5'",
-                    'result': 'split()[7][:-1]',
+                    'result': 'split()[11][:-1]',
                     'step': 'index',
                     'indicant': 'test_acc5'
                 }
@@ -395,7 +413,8 @@ re_conf_tf_models = {
                 {
                     'keyword': 'global_step/sec: ',
                     'result': 'split("global_step/sec: ")[1]',
-                    'method': 'mean'
+                    'method': 'mean',
+                    'else': 'reciprocal'
                 }
         },
     'MobileNet': {
@@ -411,7 +430,8 @@ re_conf_tf_models = {
                 {
                     'keyword': 'global_step/sec: ',
                     'result': 'split("global_step/sec: ")[1]',
-                    'method': 'mean'
+                    'method': 'mean',
+                    'else': 'reciprocal'
                 }
     },
     'Inception-V4': {
@@ -427,12 +447,127 @@ re_conf_tf_models = {
                 {
                     'keyword': 'global_step/sec: ',
                     'result': 'split("global_step/sec: ")[1]',
-                    'method': 'mean'
+                    'method': 'mean',
+                    'else': 'reciprocal'
                 }
     },
+    'StaticRNN': {
+        'performance': [
+            {
+                'keyword': 'Train Perplexity',
+                'result': 'split()[-1]',
+                'step': 'index',
+                'indicant': 'train_ppl'
+            },
+            {
+                'keyword': 'Valid Perplexity',
+                'result': 'split()[-1]',
+                'step': 'index',
+                'indicant': 'valid_ppl'
+            }
+        ],
+        'speedup_ratio':
+            {
+                'keyword': 'speed:',
+                'result': 'split()[-2]',
+                'method': 'mean'
+            }
+    },
+    'cudnn_lstm': {
+        'performance': [
+            {
+                'keyword': 'Train Perplexity',
+                'result': 'split()[-1]',
+                'step': 'index',
+                'indicant': 'train_ppl'
+            },
+            {
+                'keyword': 'Valid Perplexity',
+                'result': 'split()[-1]',
+                'step': 'index',
+                'indicant': 'valid_ppl'
+            }
+        ],
+        'speedup_ratio':
+            {
+                'keyword': 'speed:',
+                'result': 'split()[-2]',
+                'method': 'mean'
+            }
+    },
+    'DeepLab_V3+': {
+            'performance': [
+                {
+                    'keyword': "miou",
+                    'result': 'split("[")[1].split("]")[0]',
+                    'step': 'index',
+                    'indicant': 'miou'
+                }
+            ],
+            'speedup_ratio':
+                {
+                    'keyword': 'sec/step',
+                    'result': 'split()[-2][1:]',
+                    'method': 'mean'
+                }
+        },
+    'DCGAN': {
+        'speedup_ratio':
+            {
+                'keyword': 'Epoch:',
+                'result': 'split(":")[2].split()[0][:-1]',
+                'method': 'mean'
+            }
+    },
+    'transformer': {
+        'performance': [
+            {
+                'keyword': 'BLEU = ',
+                'result': 'split()[2][:-1]',
+                'step': 'index',
+                'indicant': 'BLEU'
+            }],
+        'speedup_ratio':
+            {
+                'keyword': 'global_step/sec',
+                'result': 'split()[-1]',
+                'method': 'sum'
+            }
+    },
+    'CycleGAN': {
+        'speedup_ratio':
+            {
+                'keyword': 'batch_cost',
+                'result': 'split(":")[1]',
+                'method': 'mean'
+            }
+    }
 
 }
-re_conf_pytorch_models = {}
+re_conf_pytorch_models = {
+    'TSN': {
+        'performance': [
+            {
+                'keyword': 'Testing Results:',
+                'result': 'split()[3]',
+                'step': 'index',
+                'indicant': 'test_acc1'
+            },
+            {
+                'keyword': 'Testing Results:',
+                'result': 'split()[5]',
+                'step': 'index',
+                'indicant': 'test_acc5'
+            }
+        ],
+        'speedup_ratio':
+            {
+                'keyword': 'Epoch: [0]',
+                'result': 'split()[6][1:-1]',
+                'method': 'mean'
+            }
+    }
+}
 re_conf_theano_models = {}
 re_conf_caffe_models = {}
 

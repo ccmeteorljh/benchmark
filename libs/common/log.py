@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: log module
+@File: log.py
+@Author: liangjinhua
+@Date: 2017/12/19 10:27
+"""
 import os
 import logging
 import logging.handlers
@@ -94,7 +108,7 @@ class MyLog(object):
             body_format = "[%(filename)s:%(lineno)s][%(funcName)s] %(message)s"
             formatstr = "%s%s" % (title_format, body_format)
             file_name = '../output/paddle/paddle_%s' \
-                        % (time.strftime("%Y%m%d%H%M%S", time.localtime()))
+                        % (time.strftime("%Y%m%d%H", time.localtime()))
             print file_name
             MyLog.log = Log(file_name, format=formatstr)
             MyLog.mutex.release()

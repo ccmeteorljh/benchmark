@@ -1,3 +1,31 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: dap module
+@File: dap.py
+@Author: liangjinhua
+@Date: 2018/1/3 17:28
+"""
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: dao module
+@File: dao.py
+@Author: liangjinuha
+@Date: 17/11/30 上午11:40
+"""
 import MySQLdb
 
 import libs.common.exception as myexception
@@ -65,3 +93,5 @@ class CommonDao(object):
             conn.close()
         except MySQLdb.Error as e:
             raise myexception.DBError('%s%s' % (e.message, "Close error!"))
+
+

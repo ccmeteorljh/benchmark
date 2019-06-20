@@ -1,3 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: get free gpu module
+@File: get_gpu.py
+@Author: liangjinhua
+@Date: 2018/12/18 10:00
+"""
+
 import os
 import numpy as np
 import argparse

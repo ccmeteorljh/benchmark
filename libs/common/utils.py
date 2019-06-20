@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: utils module
+@File: utils.py
+@Author: liangjinhua
+@Date: 2017/12/29 11:29
+"""
 import codecs
 import imp
 import importlib
@@ -321,3 +335,33 @@ def convert_to_order_dict(map_list):
         ordered_dict.update(map_dict)
 
     return ordered_dict
+
+
+def construct_update_sql(conditions):
+    """
+
+    :param conditions:
+        {
+            "table_name": "paddle_cloud_job",
+            "set":{
+                "log_extracted": '0'
+            },
+            "where":{
+               "cloud_job_id": "1"
+            }
+        }
+    :return: update paddle_cloud_job set log_extracted=0 where cloud_job_id='1'
+    """
+    table_name = conditions["table_name"]
+    set = ''
+    for key, value in conditions["set"].items():
+        set += " %s='%s'," % (key, value)
+    set = set[0:len(set)-1]
+
+    where = ' 1=1 '
+
+    for key, value in conditions["where"].items():
+        where += "and %s='%s' " % (key, value)
+
+    sql = "update {} set{} where {}".format(table_name, set, where)
+    return sql

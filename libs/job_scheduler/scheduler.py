@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: scheduer module
+@File: scheduer.py
+@Author: liangjinhua
+@Date: 2018/12/17 10:00
+"""
 import os
 import sys
 import multiprocessing
@@ -123,7 +137,7 @@ class ClockExtractResultProcess(multiprocessing.Process):
         extract_jobs = helper.get_final_job_with_no_extractlog()
         for job_info in extract_jobs:
             try:
-                job_result, log_dict = log_extract.LogExtractRe.log_extract(job_info)
+                job_result, vd_dict = log_extract.LogExtractRe.log_extract(job_info)
             except exception.ResponseError as rse:
                 logger.error(str(rse))
             else:
@@ -133,8 +147,8 @@ class ClockExtractResultProcess(multiprocessing.Process):
                 else:
                     log_extracted_status = "yes"
 
-                result_dict = build_in.construct_job_result_dict(job_info, job_result, log_dict)
-                helper.insert_result(**result_dict)
+                    #result_dict = build_in.construct_job_result_dict(job_info, job_result, log_dict)
+                    helper.insert_result(job_info, job_result, vd_dict)
 
                 bm.Job.objects.filter(job_id=job_info.job_id).update(
                     log_extracted=log_extracted_status)

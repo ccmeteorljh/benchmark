@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: error module
+@File: error.py
+@Author: liangjinuha
+@Date: 17/11/30 上午10:40
+"""
 import os
 import sys
 import json

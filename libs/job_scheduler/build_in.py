@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: build_in module
+@File: build_in.py
+@Author: liangjinhua
+@Date: 2018/7/19 21:01
+"""
 import datetime
 import logging
 
@@ -66,45 +80,6 @@ def load_jobs_by_path(path, args):
 
     #print jobs_list
     return jobs_list
-
-
-def construct_job_result_dict(job_info, result, log_dict):
-    """
-    :param job_info: django models model_result
-    :param result:
-            {"acc1": (step_last, result_avg)
-              "acc5": (step_last, result_avg)}
-             or
-             {"speed":result_avg}
-    :return:
-    """
-    result_dict = {
-        "job_id": job_info.job_id,
-        "model_name": job_info.model_name,
-        "report_index_results": {}
-    }
-
-    if result:
-        report_index_results = {}
-        indexs = sorted([int(x) for x in (str(job_info.report_index).split(','))],
-                              reverse=True)
-        for index in indexs:
-            if index == 0:
-                report_index_results[0] = {}
-                for key in result.keys():
-                    report_index_results[0][key] = result[key][1]
-                report_index_results[0]["visualdl_log"] = log_dict
-            elif index == 1:
-                report_index_results[1] = result["speed"]
-                result.pop("speed")
-            elif index == 2:
-                report_index_results[2] = result["gpu_mem_max"]
-                result.pop("gpu_mem_max")
-            else:
-                logging.error("")
-
-        result_dict["report_index_results"] = report_index_results
-    return result_dict
 
 
 def update_job_status():

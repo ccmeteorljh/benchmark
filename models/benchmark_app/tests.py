@@ -7,8 +7,13 @@
 #======================================================================
 
 """
-@Desc: __init__.py module
-@File: __init__.py.py
+@Desc: tests module
+@File: tests.py
 @Author: liangjinhua
-@Date: 2017/12/20 10:36
+@Date: 2019/1/30 11:31
 """
+from __future__ import unicode_literals
+
+from django.test import TestCase
+
+# Create your tests here.
