@@ -31,7 +31,10 @@ def get_cluster_job_info(job_name, list):
     get the job info
     :return:
     """
-    pcjs = bm.Job.objects.filter(job_name__icontains='%s' % job_name)
+    if job_name:
+        pcjs = bm.Job.objects.filter(job_name='%s' % job_name)
+    else:
+        pcjs = bm.Job.objects.all()
     pcjs = pcjs.filter(status__in=list)
     pcjs = pcjs.order_by('-create_time')
     return pcjs
@@ -94,6 +97,8 @@ def insert_job(job_instance):
     pcj.batch_size = job_instance.conf["batch_size"]
     pcj.frame_id = job_instance.conf["frame_id"]
     pcj.image_id = image_id
+    pcj.cuda_version = job_instance.conf["cuda_version"]
+    pcj.cudnn_version = job_instance.conf["cudnn_version"]
     pcj.run_cmd = job_instance.conf["run_cmd"]
     pcj.eval_cmd = job_instance.conf["eval_cmd"]
     pcj.infer_cmd = job_instance.conf["infer_cmd"]
@@ -106,25 +111,47 @@ def insert_job(job_instance):
     pcj.save()
 
 
-def insert_result(**job_result):
+def insert_result(job_info, job_result, log_dict):
     """
-    insert paddle cloud job result to db
+    insert job result to db
+    :param job_info:
+    :param job_result:
+            {"performance": {"acc1": (step_last, result_avg)
+              "acc5": (step_last, result_avg)}}
+             or
+             {"speed":result_avg}
+    :param log_dict:
     :return:
     """
-    job_id = job_result["job_id"]
-    model_name = job_result["model_name"]
-    for index, vaules in job_result["report_index_results"].items():
+    job_id = job_info.job_id
+    model_name = job_info.model_name
+    indexs = sorted([int(x) for x in (str(job_info.report_index).split(','))], reverse=True)
+    for index in indexs:
         mr = bm.JobResults()
         mr.job_id = job_id
         mr.model_name = model_name
         mr.report_index_id = index
-        if "visualdl_log" in vaules:
-            mr.result_log = vaules["visualdl_log"]
-            vaules.pop("visualdl_log")
-        mr.report_result = vaules
+        if index == 0:
+            values = {}
+            for key in job_result["performance"].keys():
+                values[key] = job_result["performance"][key][1]
+            mr.report_result = values
+            mr.result_log = log_dict
+        elif index == 1:
+            mr.report_result = job_result["speed"]
+        elif index == 2:
+            mr.report_result = job_result["gpu_train_mem_max"]
+        elif index == 3:
+            mr.report_result = job_result["train_time"]
+        elif index == 4:
+            mr.report_result = job_result["infer_speed"]
+        elif index == 5:
+            mr.report_result = job_result["gpu_infer_mem_max"]
+        else:
+            logging.error("error!")
         mr.save()
+
 
 if __name__ == "__main__":
     print get_cluster_job_info("dddd", ['success', 'fail', 'killed', 'deleted'])
     get_final_job_with_no_extractlog()
-    #["body"]["jobName"]
