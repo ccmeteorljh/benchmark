@@ -1,3 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#======================================================================
+#
+# Copyright (c) 2017 Baidu.com, Inc. All Rights Reserved
+#
+#======================================================================
+
+"""
+@Desc: benchmark_models module
+@File: benchmark_models.py
+@Author: liangjinhua
+@Date: 2018/12/17 11:09
+"""
+
 from django.db import models
 from django.utils import timezone
 
@@ -57,6 +72,7 @@ class RunMachineType(object):
     MULTI_MACHINE_ONE_GPU = "MULTI_MACHINE_ONE_GPU"
     MULTI_MACHINE_MULTI_GPU = "MULTI_MACHINE_MULTI_GPU"
     SPECIAL = "SPECIAL"
+    MULTI_GPU_MULTI_PROCESS = "MULTI_GPU_MULTI_PROCESS"
     VALUES_TO_NAMES = {
         0: ONE_CPU,
         1: MULTI_CPU,
@@ -67,7 +83,8 @@ class RunMachineType(object):
         6: MULTI_GPU,
         7: MULTI_MACHINE_ONE_GPU,
         8: MULTI_MACHINE_MULTI_GPU,
-        9: SPECIAL
+        9: SPECIAL,
+        10: MULTI_GPU_MULTI_PROCESS
     }
 
 
@@ -175,19 +192,42 @@ class Frame(models.Model):
         3: THEANO,
         4: CAFFE
     }
+    frame_id = models.AutoField(primary_key=True)
+    frame_name = models.CharField(max_length=32, null=True, blank=True)
+    desc = models.CharField(max_length=64, null=True, blank=True)
+    add_time = models.DateTimeField(auto_now_add=True)
+    class Meta(object):
+        """
+        mysql table
+        """
+        db_table = 'frame'
+
 
 class DockerImage(models.Model):
     """
         docker镜像，为本地启动作业所用
     """
-
+    #todo 后续可以设置一个表将镜像名字与cuda版本对应起来
     VALUES_TO_NAMES = {
         "paddlepaddle": "paddlepaddle/paddle:latest-gpu",
-        "tensorflow": "tensorflow/tensorflow:latest",
-        "pytorch": "pytorch/pytorch:latest",
+        "tensorflow": "tensorflow/tensorflow:latest-gpu",
+        "pytorch": "pytorch/pytorch:0.4_cuda9_cudnn7",
         "theano": "theano/theano:latest",
         "caffe": "caffe/caffe:latest"
     }
+
+
+class JobType(models.Model):
+    """
+       作业类型表，说明作业是models例行评估，还是rd临时实验，或者benchmark的
+    """
+    id = models.SmallIntegerField()
+    name = models.CharField(max_length=32)
+    describe = models.CharField(max_length=64, null=True, blank=True)
+    class Meta(object):
+        """ mysql table"""
+        db_table = 'job_type'
+
 
 class Image(models.Model):
     """
@@ -197,8 +237,11 @@ class Image(models.Model):
     image_name = models.CharField(max_length=64, null=True, blank=True)
     frame_id = models.SmallIntegerField()
     version = models.CharField(max_length=32)
-    #当前仅仅支持whl形式安装，0
+    cuda_version = models.CharField(max_length=16, default="9.0")
+    cudnn_version = models.CharField(max_length=16, default="7")
+    #和job_type关联
     image_type = models.SmallIntegerField()
+    image_commit_id = models.CharField(max_length=64)
     create_time = models.DateTimeField()
 
     class Meta(object):
@@ -243,21 +286,33 @@ class Job(models.Model):
     report_index = models.CharField(max_length=32)
     repo_address = models.CharField(max_length=64, blank=True)
     code_branch = models.CharField(max_length=32, default="develop")
-    #JobRype 0:benchmark 1:experiment
+    code_commit_id = models.CharField(max_length=64, default="latest")
+    #JobRype 0:models 1:experiment 2:benchmark
     job_type = models.SmallIntegerField()
     #RunRpcType
     run_rpc_type = models.CharField(max_length=32, default="GRPC_SYNC")
+
     #RunMachineType
     run_machine_type = models.CharField(max_length=32, default="ONE_GPU")
-    batch_size = models.CharField(max_length=32, blank=True)
-    frame_id = models.SmallIntegerField()
+    batch_size = models.IntegerField(blank=True)
+    frame_id = models.SmallIntegerField(blank=True)
     image_id = models.SmallIntegerField()
-    run_cmd = models.CharField(max_length=512, blank=True)
-    eval_cmd = models.CharField(max_length=256, blank=True)
-    infer_cmd = models.CharField(max_length=256, blank=True)
+    cuda_version = models.CharField(max_length=16, default="9.0")
+    cudnn_version = models.CharField(max_length=16, default="7")
 
-    submit_period = models.SmallIntegerField()
-    check_period = models.SmallIntegerField()
+    #v100 or p40
+    gpu_type = models.CharField(max_length=32, default="v100")
+
+    #staticgraph or dygraph
+    model_implement_type = models.CharField(max_length=32, default="staticgraph")
+
+    #cmd
+    run_cmd = models.CharField(max_length=1024, blank=True)
+    eval_cmd = models.CharField(max_length=1024, blank=True)
+    infer_cmd = models.CharField(max_length=1024, blank=True)
+
+    submit_period = models.SmallIntegerField(blank=True)
+    check_period = models.SmallIntegerField(blank=True)
     statistics_unit = models.CharField(max_length=10, blank=True, default="mins")
 
     create_time = models.DateTimeField(auto_now_add=True)
@@ -284,6 +339,7 @@ class JobResults(models.Model):
     report_index_id = models.SmallIntegerField()
     report_result = models.CharField(max_length=64)
     result_log = models.TextField(max_length=8192)
+    train_log_path = models.CharField(max_length=128)
     #result_log = models.CharField(max_length=8192, blank=True)
     class Meta(object):
         """
@@ -332,3 +388,41 @@ class ViewVisualDLLog(models.Model):
         db_table
         """
         db_table = 'visualDL_log'
+
+
+class ViewJobResult(models.Model):
+    """
+    job_result view table
+    """
+    mission_name = models.CharField(max_length=32, null=True, blank=True)
+    result_id = models.AutoField(primary_key=True)
+    job_id =  models.IntegerField()
+    job_name = models.CharField(max_length=64)
+    cuda_version = models.CharField(max_length=16, default="9.0")
+    cudnn_version = models.CharField(max_length=16, default="7")
+    # v100 or p40
+    gpu_type = models.CharField(max_length=32, default="v100")
+
+    # staticgraph or dygraph
+    model_implement_type = models.CharField(max_length=32, default="staticgraph")
+
+    job_type = models.SmallIntegerField()
+    code_commit_id = models.CharField(max_length=64)
+    image_commit_id = models.CharField(max_length=64)
+    model_name = models.CharField(max_length=64)
+    version = models.CharField(max_length=32)
+    frame_name = models.CharField(max_length=32)
+    run_rpc_type = models.CharField(max_length=32, default="GRPC_SYNC")
+    # RunMachineType
+    run_machine_type = models.CharField(max_length=32, default="ONE_GPU")
+    batch_size = models.CharField(max_length=32, blank=True)
+    report_index_id = models.SmallIntegerField()
+    report_result = models.CharField(max_length=64)
+    statistics_unit = models.CharField(max_length=32)
+    train_log_path = models.CharField(max_length=128)
+
+    class Meta(object):
+        """
+        db_table
+        """
+        db_table = 'job_result'
