@@ -15,7 +15,16 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.conf.urls import include
+
+from rest_framework.schemas import get_schema_view
+from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
+schema_view = get_schema_view(title='Benchmark API', renderer_classes=[OpenAPIRenderer, SwaggerUIRenderer])
+
 
 urlpatterns = [
+    url(r'^docs/', schema_view, name="docs"),
     url(r'^admin/', admin.site.urls),
+    url(r'^benchmark/', include('benchmark_app.urls')),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
